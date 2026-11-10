@@ -1,106 +1,553 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fast Video Downloader</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Background me subtle grid pattern ke liye */
-        .bg-grid-pattern {
-            background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uvids — Fast & Free Facebook Video Downloader</title>
+  
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --card-bg: rgba(22, 27, 46, 0.65);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #3b82f6;
+      --accent: #06b6d4;
+      --glow: rgba(59, 130, 246, 0.4);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* 3D Glowing Background Spheres */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .orb-1 {
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, #2563eb, transparent);
+      top: -100px;
+      left: 10%;
+    }
+    .orb-2 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, #9333ea, transparent);
+      bottom: 10%;
+      right: 5%;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Navbar */
+    header {
+      padding: 24px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #60a5fa, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-left: 24px;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 70px 0 40px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 50px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 18px;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+
+    /* 3D Input Card */
+    .download-box {
+      max-width: 780px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--card-border);
+      padding: 12px;
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 25px var(--glow);
+      display: flex;
+      gap: 12px;
+      position: relative;
+    }
+    .input-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 14px;
+      padding: 0 16px;
+      border: 1px solid transparent;
+      transition: border 0.3s ease;
+    }
+    .input-wrapper:focus-within {
+      border: 1px solid var(--primary);
+    }
+    .input-wrapper i {
+      color: var(--text-muted);
+      margin-right: 12px;
+    }
+    .input-wrapper input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 1rem;
+      padding: 14px 0;
+    }
+    .btn-paste {
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .btn-paste:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+    .btn-download {
+      background: linear-gradient(135deg, #2563eb, #0284c7);
+      color: #fff;
+      border: none;
+      padding: 0 28px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
+    }
+
+    /* Result Preview Section (Hidden initially) */
+    .result-section {
+      display: none;
+      max-width: 780px;
+      margin: 30px auto 0;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 24px;
+      animation: fadeIn 0.4s ease forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .preview-card {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .thumbnail {
+      width: 180px;
+      height: 110px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: #1e293b;
+    }
+    .video-info {
+      flex: 1;
+    }
+    .video-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    .quality-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .quality-btn {
+      background: #1e293b;
+      color: #fff;
+      border: 1px solid var(--card-border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .quality-btn:hover {
+      background: var(--primary);
+    }
+
+    /* 3D Feature Grid */
+    .features {
+      padding: 80px 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: left;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+    .feature-card:hover {
+      border-color: rgba(96, 165, 250, 0.4);
+      transform: translateY(-8px);
+    }
+    .feature-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(59, 130, 246, 0.15);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: #38bdf8;
+      margin-bottom: 20px;
+    }
+    .feature-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 10px;
+    }
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* How It Works Steps */
+    .steps {
+      padding: 50px 0;
+      text-align: center;
+    }
+    .steps h2 {
+      font-size: 2.2rem;
+      margin-bottom: 40px;
+    }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .step-box {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+    }
+    .step-num {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.1);
+      margin-bottom: 8px;
+    }
+
+    /* FAQ */
+    .faq {
+      max-width: 800px;
+      margin: 40px auto 80px;
+    }
+    .faq h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .faq-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      padding: 18px 20px;
+      cursor: pointer;
+    }
+    .faq-question {
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .faq-answer {
+      color: var(--text-muted);
+      margin-top: 10px;
+      font-size: 0.95rem;
+      display: none;
+      line-height: 1.5;
+    }
+    .faq-item.active .faq-answer {
+      display: block;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--card-border);
+      padding: 30px 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 650px) {
+      .hero h1 { font-size: 2.2rem; }
+      .download-box { flex-direction: column; }
+      .btn-download { padding: 14px; justify-content: center; }
+      .preview-card { flex-direction: column; text-align: center; }
+      .quality-buttons { justify-content: center; }
+    }
+  </style>
 </head>
-<body class="bg-[#0B0F19] text-white font-sans min-h-screen flex flex-col relative overflow-x-hidden">
+<body>
 
-    <!-- Background Glow Effects -->
-    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600 rounded-full blur-[150px] opacity-20 pointer-events-none"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-cyan-500 rounded-full blur-[150px] opacity-10 pointer-events-none"></div>
+  <!-- Floating Background Glows -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
 
+  <div class="container">
     <!-- Navbar -->
-    <nav class="w-full px-6 py-5 flex justify-between items-center z-10 border-b border-white/5 backdrop-blur-md">
-        <div class="flex items-center gap-2 cursor-pointer">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            </div>
-            <span class="text-xl font-bold tracking-wider">Fast<span class="text-blue-500">DL</span></span>
-        </div>
-        <div class="hidden md:flex gap-6 text-sm text-gray-400 font-medium">
-            <a href="#" class="hover:text-white transition-colors">Home</a>
-            <a href="#" class="hover:text-white transition-colors">How it works</a>
-            <a href="#" class="hover:text-white transition-colors">FAQ</a>
-        </div>
-    </nav>
+    <header>
+      <div class="logo">
+        <i class="fa-solid fa-play-circle"></i> Uvids
+      </div>
+      <nav class="nav-links">
+        <a href="#how-to">Kaise use karein</a>
+        <a href="#features">Features</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+    </header>
 
     <!-- Hero Section -->
-    <main class="flex-grow flex flex-col items-center justify-center px-4 py-16 z-10">
-        
-        <!-- Badge -->
-        <div class="mb-6 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-wide uppercase">
-            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-            Fastest & Secure Downloader
+    <section class="hero">
+      <div class="badge">
+        <i class="fa-solid fa-bolt"></i> Ultra Fast & Secure
+      </div>
+      <h1>Facebook Videos Download Karein <br><span>HD & 4K Quality</span> Me</h1>
+      <p>FB Reels, Videos aur Stories ko bina kisi registration ke 1-Click me download karein.</p>
+
+      <!-- Main Input Box -->
+      <div class="download-box">
+        <div class="input-wrapper">
+          <i class="fa-brands fa-facebook"></i>
+          <input type="text" id="fbUrl" placeholder="Facebook Video link yahan paste karein...">
+          <button class="btn-paste" onclick="pasteClipboard()">Paste</button>
         </div>
+        <button class="btn-download" onclick="handleDownload()">
+          <i class="fa-solid fa-arrow-down"></i> Get Video
+        </button>
+      </div>
 
-        <!-- Heading -->
-        <h1 class="text-4xl md:text-6xl font-extrabold text-center leading-tight mb-4">
-            Download Videos in <br class="hidden md:block" />
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">High Quality</span>
-        </h1>
-        
-        <p class="text-gray-400 text-center max-w-2xl mb-10 text-sm md:text-base">
-            Paste your link below to download videos from YouTube, Instagram, Facebook, and more. No ads, no waiting.
-        </p>
-
-        <!-- Main Download Box (Glassmorphism Card) -->
-        <div class="w-full max-w-3xl bg-[#111827]/80 backdrop-blur-xl border border-gray-800 rounded-2xl p-2 md:p-3 shadow-2xl shadow-blue-500/10">
-            
-            <!-- Input Field Wrapper -->
-            <div class="flex flex-col md:flex-row gap-2">
-                
-                <!-- Input Box with Paste Button -->
-                <div class="relative flex-grow flex items-center bg-[#1F2937] rounded-xl border border-gray-700 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/30 transition-all overflow-hidden">
-                    
-                    <!-- Link Icon -->
-                    <div class="pl-4 text-gray-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                    </div>
-
-                    <input 
-                        type="text" 
-                        placeholder="Paste video URL here (e.g., https://youtube.com/...)" 
-                        class="w-full bg-transparent text-white px-4 py-4 outline-none placeholder-gray-500 text-sm md:text-base"
-                    >
-                    
-                    <!-- Paste Button inside input -->
-                    <button class="absolute right-2 px-3 py-1.5 md:px-4 md:py-2 bg-gray-700/50 hover:bg-gray-600/80 border border-gray-600 text-xs md:text-sm font-medium rounded-lg transition-colors text-gray-300 hover:text-white">
-                        Paste
-                    </button>
-                </div>
-
-                <!-- Download Button -->
-                <button class="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold py-4 px-8 rounded-xl transition-all shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] flex items-center justify-center gap-2 whitespace-nowrap">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Download
-                </button>
-
+      <!-- Result Card -->
+      <div class="result-section" id="resultCard">
+        <div class="preview-card">
+          <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500" alt="Video Preview" class="thumbnail" id="videoThumb">
+          <div class="video-info">
+            <h4 class="video-title" id="videoTitle">Facebook Reel / Video Title</h4>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Duration: 00:45 | Quality: 1080p Full HD</p>
+            <div class="quality-buttons">
+              <a href="#" class="quality-btn" download><i class="fa-solid fa-download"></i> 1080p HD</a>
+              <a href="#" class="quality-btn" download><i class="fa-solid fa-download"></i> 720p SD</a>
+              <a href="#" class="quality-btn" download><i class="fa-solid fa-music"></i> Audio MP3</a>
             </div>
-
-            <!-- Supported Platforms -->
-            <div class="mt-4 flex flex-wrap justify-center items-center gap-4 text-gray-500 text-sm border-t border-gray-800 pt-4">
-                <span class="text-xs uppercase tracking-wider text-gray-600 font-semibold">Works on:</span>
-                <!-- Aap yahan original SVG icons use kar sakte hain, abhi text use kar raha hu -->
-                <span class="hover:text-white cursor-pointer transition-colors font-medium flex items-center gap-1">▶ YouTube</span>
-                <span class="hover:text-white cursor-pointer transition-colors font-medium flex items-center gap-1">📸 Instagram</span>
-                <span class="hover:text-white cursor-pointer transition-colors font-medium flex items-center gap-1">📘 Facebook</span>
-                <span class="hover:text-white cursor-pointer transition-colors font-medium flex items-center gap-1">🐦 Twitter</span>
-            </div>
-
+          </div>
         </div>
+      </div>
+    </section>
 
-    </main>
+    <!-- Features Section -->
+    <section class="features" id="features">
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-gauge-high"></i></div>
+        <h3>High-Speed Server</h3>
+        <p>Bina kisi buffering ke direct high-speed server se video download access.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3>100% Safe & Private</h3>
+        <p>Aapka koi personal data store nahi hota. Poori tarah secure aur ads-free environment.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-mobile-screen"></i></div>
+        <h3>Sabhi Devices Compatible</h3>
+        <p>Mobile, Tablet, Android, iPhone ya PC—sab jagah smoothly kaam karega.</p>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="steps" id="how-to">
+      <h2>Sirf 3 Simple Steps</h2>
+      <div class="steps-grid">
+        <div class="step-box">
+          <div class="step-num">01</div>
+          <h4>Link Copy Karein</h4>
+          <p style="color: var(--text-muted); margin-top: 8px;">Facebook app ya site se kisi bhi video ka link copy karein.</p>
+        </div>
+        <div class="step-box">
+          <div class="step-num">02</div>
+          <h4>Uvids Par Paste Karein</h4>
+          <p style="color: var(--text-muted); margin-top: 8px;">Upar diye gaye input box me link paste karein aur click karein.</p>
+        </div>
+        <div class="step-box">
+          <div class="step-num">03</div>
+          <h4>Download Par Click Karein</h4>
+          <p style="color: var(--text-muted); margin-top: 8px;">Apni manpasand quality (HD/SD/MP3) select karke save karein.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-question">Kya Uvids bilkul free hai? <i class="fa-solid fa-chevron-down"></i></div>
+        <div class="faq-answer">Haan, yeh service sabhi users ke liye 100% lifetime free hai.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-question">Kya mujhe koi account create karna hoga? <i class="fa-solid fa-chevron-down"></i></div>
+        <div class="faq-answer">Nahi, bina kisi registration ya login ke aap directly download kar sakte hain.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-question">Kya private videos download ho sakte hain? <i class="fa-solid fa-chevron-down"></i></div>
+        <div class="faq-answer">Nahi, security reasons ki wajah se sirf public videos aur reels hi download kiye ja sakte hain.</div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2026 Uvids. All Rights Reserved. Disclaimer: We are not affiliated with Meta or Facebook.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Paste from Clipboard functionality
+    async function pasteClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById('fbUrl').value = text;
+      } catch (err) {
+        alert("Clipboard permission grant kijiye.");
+      }
+    }
+
+    // Simulated Fetch & Download button click
+    function handleDownload() {
+      const input = document.getElementById('fbUrl').value.trim();
+      const resultCard = document.getElementById('resultCard');
+
+      if (!input) {
+        alert("Kripya valid Facebook video link enter karein!");
+        return;
+      }
+
+      // Button loading state
+      const btn = document.querySelector('.btn-download');
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Fetching...`;
+
+      // Simulating API response (yahan aap apna API call integrate kar sakte hain)
+      setTimeout(() => {
+        btn.innerHTML = `<i class="fa-solid fa-arrow-down"></i> Get Video`;
+        resultCard.style.display = "block";
+        resultCard.scrollIntoView({ behavior: 'smooth' });
+      }, 1200);
+    }
+
+    // FAQ Toggle
+    function toggleFaq(element) {
+      element.classList.toggle('active');
+    }
+  </script>
 </body>
 </html>
