@@ -2,593 +2,105 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <title>Uvids - Premium Video & Audio Downloader</title>
-    <meta name="description" content="Download high-quality videos and MP3 audio from Facebook, Instagram, and YouTube for free.">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23a855f7'/><text y='.9em' font-size='80' x='10' fill='white'>▶</text></svg>">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fast Video Downloader</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg-color: #030408; --card-bg: rgba(17, 20, 32, 0.6); --border-color: rgba(255, 255, 255, 0.08);
-            --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --primary-hover: #7c3aed;
-            --success: #10b981; --glow-color: #8b5cf6; 
+        /* Background me subtle grid pattern ke liye */
+        .bg-grid-pattern {
+            background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
         }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        html { scroll-behavior: smooth; }
-        
-        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 15px 140px 15px; overflow-x: hidden; position: relative; }
-        .app-container { width: 100%; max-width: 480px; flex: 1; z-index: 1; }
-
-        /* =========================================
-           CUSTOM TOAST NOTIFICATION
-           ========================================= */
-        .toast-container {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 99999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px;
-            pointer-events: none;
-        }
-        .toast {
-            background: rgba(17, 20, 32, 0.9); backdrop-filter: blur(10px);
-            border: 1px solid var(--border-color); color: white;
-            padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 500;
-            display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            animation: slideDown 0.3s ease-out forwards; pointer-events: auto;
-        }
-        .toast.error { border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.2); }
-        .toast.success { border-color: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
-        
-        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-100%); opacity: 0; } }
-
-        /* =========================================
-           BACKGROUND EFFECTS: PARALLAX ORBS & STARS
-           ========================================= */
-        .orb { position: fixed; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.5; transition: transform 0.1s ease-out; }
-        .orb-1 { width: 300px; height: 300px; background: #8b5cf6; top: -50px; left: -50px; }
-        .orb-2 { width: 250px; height: 250px; background: #ec4899; bottom: 10%; right: -50px; }
-        .orb-3 { width: 200px; height: 200px; background: #06b6d4; top: 40%; left: 20%; }
-
-        .stars {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
-            background-image: radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)), radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)), radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0,0,0,0));
-            background-repeat: repeat; background-size: 200px 200px; animation: twinkle 5s infinite linear;
-        }
-        @keyframes twinkle { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
-
-        /* HEADER & LOGO */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-top: 5px; }
-        .logo-container { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-        
-        .logo-icon { 
-            position: relative; width: 46px; height: 46px; 
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15));
-            backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 14px; display: flex; justify-content: center; align-items: center; 
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255,255,255,0.05);
-            transition: transform 0.3s ease;
-        }
-        .logo-container:hover .logo-icon { transform: translateY(-2px) scale(1.05); }
-        
-        .brand-text { font-family: 'Poppins', sans-serif; font-size: 26px; font-weight: 800; display: flex; align-items: center; line-height: 1; letter-spacing: -0.5px; }
-        .brand-u { background: linear-gradient(135deg, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .brand-vids { color: #ffffff; text-shadow: 0 2px 10px rgba(255,255,255,0.2); margin-left: 1px; }
-        
-        .badge { font-size: 10px; font-weight: 700; color: #06b6d4; background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2); padding: 6px 12px; border-radius: 20px; }
-
-        /* HERO */
-        .hero { text-align: center; margin-bottom: 15px; }
-        .hero h1 { font-family: 'Poppins', sans-serif; font-size: 32px; font-weight: 800; line-height: 1.15; margin-bottom: 10px; letter-spacing: -0.5px; }
-        .hero h1 span { background: linear-gradient(90deg, #a855f7, #ec4899, #a855f7); background-size: 200% auto; color: transparent; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 3s linear infinite; }
-        @keyframes shine { to { background-position: 200% center; } }
-        .hero p { color: var(--text-muted); font-size: 14px; margin-bottom: 10px; }
-
-        .live-counter { display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #10b981; margin-bottom: 20px; background: rgba(16, 185, 129, 0.1); padding: 5px 12px; border-radius: 20px; display: inline-block; margin-left: 50%; transform: translateX(-50%); }
-        
-        /* TABS */
-        .tabs-container { display: flex; gap: 8px; margin-bottom: 20px; width: 100%; }
-        .tab-btn { flex: 1; min-width: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 12px 5px; border-radius: 12px; color: var(--text-muted); font-weight: 600; font-size: 12px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .tab-btn.active { background: rgba(255, 255, 255, 0.1); border-color: var(--glow-color); color: white; box-shadow: 0 0 15px var(--glow-color); }
-        .tab-btn svg { width: 16px; height: 16px; flex-shrink: 0; } 
-
-        /* TOOL CARD */
-        .tool-card { background: var(--card-bg); backdrop-filter: blur(16px); border: 1px solid var(--border-color); border-radius: 20px; padding: 25px 20px; margin-bottom: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px var(--glow-color); transition: box-shadow 0.5s ease; }
-        
-        .input-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
-        .input-field { width: 100%; padding: 16px 80px 16px 16px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 12px; color: white; font-size: 15px; outline: none; transition: 0.3s; }
-        .input-field:focus { border-color: var(--glow-color); box-shadow: 0 0 15px rgba(255,255,255,0.1); }
-        
-        /* CLEAR (X) & PASTE BUTTONS */
-        .action-icons { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: flex; gap: 5px; }
-        .icon-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
-        .icon-btn:hover { background: var(--primary); }
-        .clear-btn { display: none; } /* Shown via JS */
-
-        .action-btn { position: relative; overflow: hidden; width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.3s; }
-        .action-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transition: 0.5s; }
-        .action-btn:hover::before { left: 100%; }
-        .action-btn:disabled { background: #374151; cursor: not-allowed; }
-
-        /* SKELETON LOADER */
-        .skeleton-box { display: none; margin-top: 20px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 16px; border: 1px solid var(--border-color); }
-        .skeleton-thumb { width: 100%; height: 180px; background: #1f2937; border-radius: 12px; margin-bottom: 15px; animation: pulse 1.5s infinite; }
-        .skeleton-text { width: 80%; height: 20px; background: #1f2937; border-radius: 4px; margin: 0 auto 10px; animation: pulse 1.5s infinite; }
-        .skeleton-btn { width: 100%; height: 50px; background: #1f2937; border-radius: 10px; margin-top: 10px; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 0.3; } 100% { opacity: 0.6; } }
-
-        /* RESULT AREA */
-        .result-area { display: none; margin-top: 25px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 16px; padding: 15px; }
-        .result-area.active { display: block; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-
-        .video-thumb { width: 100%; border-radius: 12px; margin-bottom: 15px; display: none; object-fit: cover; max-height: 200px; }
-        .video-title { font-size: 14px; font-weight: 600; text-align: center; margin-bottom: 15px; line-height: 1.4; word-break: break-word; }
-        
-        .dl-btn { display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; padding: 15px; border-radius: 10px; font-weight: 700; font-size: 14px; text-decoration: none; margin-bottom: 10px; color: white !important; transition: 0.3s; }
-        .dl-btn:hover { transform: scale(1.02); }
-        .btn-hd { background: var(--success); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
-        .btn-sd { background: #3b82f6; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
-        .btn-mp3 { background: #f59e0b; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
-        
-        .reset-btn { display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; padding: 12px; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .reset-btn:hover { background: rgba(255,255,255,0.05); color: white; }
-        .reset-btn svg { width: 16px; height: 16px; }
-
-        /* RECENT HISTORY */
-        .recent-history { display: none; margin-top: 25px; }
-        .recent-history h3 { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 10px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
-        .history-item { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--border-color); cursor: pointer; transition: 0.3s; }
-        .history-item:hover { background: rgba(255,255,255,0.08); border-color: var(--primary); }
-        .history-item img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
-        .history-info { flex: 1; overflow: hidden; }
-        .history-title { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .history-url { font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* SECTIONS & FOOTER */
-        .section-title { font-family: 'Poppins', sans-serif; text-align: center; font-size: 20px; font-weight: 700; margin: 30px 0 20px; scroll-margin-top: 20px; }
-        .steps-container { display: flex; flex-direction: column; gap: 15px; }
-        .step-card { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; text-align: center; transition: transform 0.3s ease, border-color 0.3s ease; }
-        .step-card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .step-num { width: 30px; height: 30px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto 10px; }
-        .step-card h4 { font-size: 15px; margin-bottom: 5px; }
-        .step-card p { color: var(--text-muted); font-size: 13px; }
-
-        .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .feature-box { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid var(--border-color); padding: 15px; border-radius: 16px; text-align: center; transition: transform 0.3s ease; }
-        .feature-box:hover { transform: translateY(-3px); border-color: #ec4899; }
-        .feature-icon { font-size: 24px; margin-bottom: 10px; }
-        .feature-box h4 { font-size: 14px; margin-bottom: 5px; }
-        .feature-box p { color: var(--text-muted); font-size: 11px; }
-
-        .bottom-nav { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(17, 20, 32, 0.8); backdrop-filter: blur(15px); border: 1px solid var(--border-color); border-radius: 30px; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 10px; font-weight: 600; text-decoration: none; gap: 4px; cursor: pointer; transition: 0.3s; }
-        .nav-item.active, .nav-item:hover { color: var(--primary); }
-        .nav-icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-
-        .ad-container { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 16px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; min-height: 60px; }
-        .footer { text-align: center; color: var(--text-muted); font-size: 12px; line-height: 1.8; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); }
-        .footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 15px; }
-        .footer-links a { color: var(--text-muted); text-decoration: none; transition: 0.3s; }
-        .footer-links a:hover { color: var(--primary); }
-        
-        .loader { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.2); border-top: 3px solid white; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
+<body class="bg-[#0B0F19] text-white font-sans min-h-screen flex flex-col relative overflow-x-hidden">
 
-<!-- TOAST NOTIFICATION CONTAINER -->
-<div id="toastContainer" class="toast-container"></div>
+    <!-- Background Glow Effects -->
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600 rounded-full blur-[150px] opacity-20 pointer-events-none"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-cyan-500 rounded-full blur-[150px] opacity-10 pointer-events-none"></div>
 
-<div class="stars"></div>
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
-<div class="orb orb-3"></div>
-
-<div class="app-container">
-    <header class="header">
-        <a href="#" class="logo-container">
-            <div class="logo-icon">
-                <svg width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="bgGrad" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#8b5cf6"/><stop offset="1" stop-color="#ec4899"/></linearGradient>
-                        <linearGradient id="uGrad" x1="12" y1="12" x2="36" y2="36"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#e2e8f0"/></linearGradient>
-                        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#ec4899" flood-opacity="0.4"/></filter>
-                    </defs>
-                    <rect width="48" height="48" rx="14" fill="url(#bgGrad)" filter="url(#shadow)"/>
-                    <path d="M16 14v12c0 4.418 3.582 8 8 8s8-3.582 8-8V14" stroke="url(#uGrad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M22 20l8 4-8 4v-8z" fill="#ffffff" />
-                </svg>
+    <!-- Navbar -->
+    <nav class="w-full px-6 py-5 flex justify-between items-center z-10 border-b border-white/5 backdrop-blur-md">
+        <div class="flex items-center gap-2 cursor-pointer">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             </div>
-            <div class="brand-text">
-                <span class="brand-u">U</span><span class="brand-vids">vids</span>
-            </div>
-        </a>
-        <div class="badge">● Premium</div>
-    </header>
-
-    <div class="hero">
-        <h1>Videos & Audio <br><span>made simple.</span></h1>
-        <p>Download high-quality videos from your favorite platforms.</p>
-        <div class="live-counter">
-            <span style="font-size: 14px;">🔥</span> <span id="downloadCount">1,245</span> videos downloaded today
+            <span class="text-xl font-bold tracking-wider">Fast<span class="text-blue-500">DL</span></span>
         </div>
-    </div>
+        <div class="hidden md:flex gap-6 text-sm text-gray-400 font-medium">
+            <a href="#" class="hover:text-white transition-colors">Home</a>
+            <a href="#" class="hover:text-white transition-colors">How it works</a>
+            <a href="#" class="hover:text-white transition-colors">FAQ</a>
+        </div>
+    </nav>
 
-    <div class="tabs-container">
-        <button class="tab-btn active" onclick="setTab('YouTube', this, '#ff0000')">
-            <svg viewBox="0 0 24 24" fill="#ff0000"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-            <span>YouTube</span>
-        </button>
-        <button class="tab-btn" onclick="setTab('Instagram', this, '#ec4899')">
-            <svg viewBox="0 0 24 24" fill="#e1306c"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
-            <span>Instagram</span>
-        </button>
-        <button class="tab-btn" onclick="setTab('Facebook', this, '#1877f2')">
-            <svg viewBox="0 0 24 24" fill="#1877f2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            <span>Facebook</span>
-        </button>
-    </div>
-
-    <div class="tool-card">
-        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; display: block;">PASTE VIDEO LINK</label>
+    <!-- Hero Section -->
+    <main class="flex-grow flex flex-col items-center justify-center px-4 py-16 z-10">
         
-        <div class="input-wrapper">
-            <input type="text" id="videoUrl" class="input-field" placeholder="Paste YouTube link here..." oninput="toggleClearBtn()">
-            <div class="action-icons">
-                <button class="icon-btn clear-btn" id="clearBtn" onclick="clearInput()" title="Clear">✕</button>
-                <button class="icon-btn" onclick="pasteLink()" title="Paste">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-                </button>
-            </div>
+        <!-- Badge -->
+        <div class="mb-6 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-wide uppercase">
+            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+            Fastest & Secure Downloader
         </div>
+
+        <!-- Heading -->
+        <h1 class="text-4xl md:text-6xl font-extrabold text-center leading-tight mb-4">
+            Download Videos in <br class="hidden md:block" />
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">High Quality</span>
+        </h1>
         
-        <button id="mainBtn" class="action-btn" onclick="getVideo()">
-            <span id="btnText">Check Link ↗</span>
-            <div id="btnLoader" class="loader"></div>
-        </button>
+        <p class="text-gray-400 text-center max-w-2xl mb-10 text-sm md:text-base">
+            Paste your link below to download videos from YouTube, Instagram, Facebook, and more. No ads, no waiting.
+        </p>
 
-        <!-- SKELETON LOADER -->
-        <div id="skeletonLoader" class="skeleton-box">
-            <div class="skeleton-thumb"></div>
-            <div class="skeleton-text"></div>
-            <div class="skeleton-btn"></div>
-        </div>
-
-        <!-- RESULT AREA -->
-        <div id="resultArea" class="result-area">
-            <img id="vidThumb" class="video-thumb" src="" onerror="this.style.display='none'">
-            <div id="vidTitle" class="video-title"></div>
+        <!-- Main Download Box (Glassmorphism Card) -->
+        <div class="w-full max-w-3xl bg-[#111827]/80 backdrop-blur-xl border border-gray-800 rounded-2xl p-2 md:p-3 shadow-2xl shadow-blue-500/10">
             
-            <a id="btnHd" href="#" target="_blank" class="dl-btn btn-hd">Download HD Video</a>
-            <a id="btnSd" href="#" target="_blank" class="dl-btn btn-sd">Download Normal Video</a>
-            <a id="btnMp3" href="#" target="_blank" class="dl-btn btn-mp3">🎵 Download MP3 Audio</a>
-            
-            <button class="reset-btn" onclick="resetTool()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path>
-                </svg>
-                Download Another Video
-            </button>
-        </div>
-    </div>
+            <!-- Input Field Wrapper -->
+            <div class="flex flex-col md:flex-row gap-2">
+                
+                <!-- Input Box with Paste Button -->
+                <div class="relative flex-grow flex items-center bg-[#1F2937] rounded-xl border border-gray-700 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/30 transition-all overflow-hidden">
+                    
+                    <!-- Link Icon -->
+                    <div class="pl-4 text-gray-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    </div>
 
-    <!-- RECENT HISTORY SECTION -->
-    <div id="recentHistory" class="recent-history">
-        <h3>🕒 Recent History</h3>
-        <div id="historyList"></div>
-    </div>
-
-    <div id="offers-section" class="ad-container">
-        <span style="color:#374151; font-size:12px;">[ Advertisement ]</span>
-    </div>
-
-    <h2 id="how-to" class="section-title">How to Download?</h2>
-    <div class="steps-container">
-        <div class="step-card"><div class="step-num">1</div><h4>Copy the Link</h4><p>Open the app and copy the video link.</p></div>
-        <div class="step-card"><div class="step-num">2</div><h4>Paste it Here</h4><p>Paste the link above and click Check Link.</p></div>
-        <div class="step-card"><div class="step-num">3</div><h4>Download</h4><p>Choose your quality and save it.</p></div>
-    </div>
-
-    <h2 id="features" class="section-title">Why Choose Uvids?</h2>
-    <div class="features-grid">
-        <div class="feature-box"><div class="feature-icon">⚡</div><h4>Super Fast</h4><p>Instant downloads.</p></div>
-        <div class="feature-box"><div class="feature-icon">🔒</div><h4>100% Private</h4><p>We never store links.</p></div>
-    </div>
-
-    <div class="footer">
-        <div class="footer-links">
-            <a href="about.html">About Us</a>
-            <a href="privacy.html">Privacy</a>
-            <a href="terms.html">Terms</a>
-            <a href="disclaimer.html">Disclaimer</a>
-            <a href="dmca.html">DMCA</a>
-            <a href="contact.html">Contact</a>
-        </div>
-        <p style="margin-bottom: 10px; font-weight: 500; color: #e2e8f0;">Made with <span style="color: #ec4899;">❤️</span> From Village Post Basari M.P</p>
-        <strong>Uvids</strong> · Simple tools for video links.
-    </div>
-</div>
-
-<div class="bottom-nav">
-    <a href="#" class="nav-item active"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Home</span></a>
-    <a href="#how-to" class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg><span>How to Use</span></a>
-    <a href="#features" class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><span>Features</span></a>
-</div>
-
-<div id="adModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index:9999; justify-content:center; align-items:center;">
-    <div style="background:#111827; border:1px solid #1f2937; border-radius:20px; padding:25px; width:90%; max-width:400px; text-align:center;">
-        <h2 style="color:white; font-size:18px; margin-bottom:15px;">Your download is ready!</h2>
-        <div style="margin-bottom:20px; min-height:250px; display:flex; justify-content:center; align-items:center; background:#030712; border:1px dashed #374151; border-radius:12px;">
-            <span style="color:#374151; font-size:12px;">[ Ad Space ]</span>
-        </div>
-        <button onclick="startActualDownload()" style="width:100%; padding:15px; background:#10b981; color:white; border:none; border-radius:12px; font-size:16px; font-weight:700; cursor:pointer;">Close Ad & Download</button>
-    </div>
-</div>
-
-<script>
-    var currentHdUrl = ""; var currentSdUrl = ""; var currentAudioUrl = ""; var pendingDownloadUrl = "";
-
-    // 1. TOAST NOTIFICATION FUNCTION
-    function showToast(message, type = 'success') {
-        const container = document.getElementById('toastContainer');
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.innerHTML = `
-            <span style="font-size: 18px;">${type === 'success' ? '✅' : '⚠️'}</span>
-            <span>${message}</span>
-        `;
-        container.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.style.animation = 'slideUp 0.3s ease-in forwards';
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }
-
-    // 2. PARALLAX 3D EFFECT FOR ORBS
-    document.addEventListener('mousemove', (e) => {
-        const x = (window.innerWidth / 2 - e.pageX) / 50;
-        const y = (window.innerHeight / 2 - e.pageY) / 50;
-        document.querySelector('.orb-1').style.transform = `translate(${x}px, ${y}px)`;
-        document.querySelector('.orb-2').style.transform = `translate(${-x}px, ${-y}px)`;
-        document.querySelector('.orb-3').style.transform = `translate(${x}px, ${-y}px)`;
-    });
-
-    // 3. CLEAR & PASTE BUTTON LOGIC
-    function toggleClearBtn() {
-        const input = document.getElementById('videoUrl');
-        const clearBtn = document.getElementById('clearBtn');
-        clearBtn.style.display = input.value.length > 0 ? 'flex' : 'none';
-    }
-
-    function clearInput() {
-        document.getElementById('videoUrl').value = '';
-        document.getElementById('clearBtn').style.display = 'none';
-        document.getElementById('videoUrl').focus();
-    }
-
-    async function pasteLink() {
-        try {
-            const text = await navigator.clipboard.readText();
-            document.getElementById('videoUrl').value = text;
-            toggleClearBtn();
-        } catch (err) {
-            showToast('Please allow clipboard access.', 'error');
-        }
-    }
-
-    // 4. RECENT HISTORY LOGIC (LocalStorage)
-    function saveToHistory(url, title, thumb) {
-        let history = JSON.parse(localStorage.getItem('uvids_history')) || [];
-        history = history.filter(item => item.url !== url); // Remove duplicate
-        history.unshift({ url, title, thumb, date: Date.now() }); // Add to top
-        history = history.slice(0, 3); // Keep only last 3
-        localStorage.setItem('uvids_history', JSON.stringify(history));
-        loadHistory();
-    }
-
-    function loadHistory() {
-        const history = JSON.parse(localStorage.getItem('uvids_history')) || [];
-        const historySection = document.getElementById('recentHistory');
-        const historyList = document.getElementById('historyList');
-        
-        if (history.length === 0) {
-            historySection.style.display = 'none';
-            return;
-        }
-        
-        historySection.style.display = 'block';
-        historyList.innerHTML = '';
-        
-        history.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'history-item';
-            div.onclick = () => {
-                document.getElementById('videoUrl').value = item.url;
-                toggleClearBtn();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            };
-            div.innerHTML = `
-                <img src="${item.thumb || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23333%22/><text x=%2250%22 y=%2255%22 fill=%22%23fff%22 font-size=%2230%22 text-anchor=%22middle%22>▶</text></svg>'}" alt="thumb">
-                <div class="history-info">
-                    <div class="history-title">${item.title}</div>
-                    <div class="history-url">${item.url}</div>
+                    <input 
+                        type="text" 
+                        placeholder="Paste video URL here (e.g., https://youtube.com/...)" 
+                        class="w-full bg-transparent text-white px-4 py-4 outline-none placeholder-gray-500 text-sm md:text-base"
+                    >
+                    
+                    <!-- Paste Button inside input -->
+                    <button class="absolute right-2 px-3 py-1.5 md:px-4 md:py-2 bg-gray-700/50 hover:bg-gray-600/80 border border-gray-600 text-xs md:text-sm font-medium rounded-lg transition-colors text-gray-300 hover:text-white">
+                        Paste
+                    </button>
                 </div>
-            `;
-            historyList.appendChild(div);
-        });
-    }
-    loadHistory(); // Load on startup
 
-    // 5. TYPING & TAB LOGIC
-    const placeholders = ["Paste YouTube link here...", "Paste Instagram Reel here...", "Paste Facebook Video here..."];
-    let typeIndex = 0; let charIndex = 0; let isDeleting = false;
-    const inputField = document.getElementById('videoUrl');
+                <!-- Download Button -->
+                <button class="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold py-4 px-8 rounded-xl transition-all shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] flex items-center justify-center gap-2 whitespace-nowrap">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Download
+                </button>
 
-    function typePlaceholder() {
-        const currentText = placeholders[typeIndex];
-        if (isDeleting) {
-            inputField.placeholder = currentText.substring(0, charIndex - 1);
-            charIndex--;
-        } else {
-            inputField.placeholder = currentText.substring(0, charIndex + 1);
-            charIndex++;
-        }
+            </div>
 
-        let typeSpeed = isDeleting ? 50 : 100;
+            <!-- Supported Platforms -->
+            <div class="mt-4 flex flex-wrap justify-center items-center gap-4 text-gray-500 text-sm border-t border-gray-800 pt-4">
+                <span class="text-xs uppercase tracking-wider text-gray-600 font-semibold">Works on:</span>
+                <!-- Aap yahan original SVG icons use kar sakte hain, abhi text use kar raha hu -->
+                <span class="hover:text-white cursor-pointer transition-colors font-medium flex items-center gap-1">▶ YouTube</span>
+                <span class="hover:text-white cursor-pointer transition-colors font-medium flex items-center gap-1">📸 Instagram</span>
+                <span class="hover:text-white cursor-pointer transition-colors font-medium flex items-center gap-1">📘 Facebook</span>
+                <span class="hover:text-white cursor-pointer transition-colors font-medium flex items-center gap-1">🐦 Twitter</span>
+            </div>
 
-        if (!isDeleting && charIndex === currentText.length) {
-            typeSpeed = 2000; 
-            isDeleting = true;
-        } else if (isDeleting && charIndex === 0) {
-            isDeleting = false;
-            typeIndex = (typeIndex + 1) % placeholders.length;
-            typeSpeed = 500;
-        }
-        setTimeout(typePlaceholder, typeSpeed);
-    }
-    typePlaceholder();
+        </div>
 
-    function setTab(platform, btn, glowColor) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.documentElement.style.setProperty('--glow-color', glowColor);
-        
-        if(platform === 'YouTube') inputField.placeholder = "https://www.youtube.com/watch?v=...";
-        if(platform === 'Instagram') inputField.placeholder = "https://www.instagram.com/reel/...";
-        if(platform === 'Facebook') inputField.placeholder = "https://www.facebook.com/watch/...";
-    }
-    setTab('YouTube', document.querySelector('.tab-btn.active'), '#ff0000');
-
-    // FAKE LIVE COUNTER
-    let counter = 1245;
-    setInterval(() => {
-        counter += Math.floor(Math.random() * 3) + 1;
-        document.getElementById('downloadCount').innerText = counter.toLocaleString();
-    }, 5000);
-
-    function blastConfetti() {
-        var duration = 2 * 1000;
-        var animationEnd = Date.now() + duration;
-        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
-        function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-        var interval = setInterval(function() {
-            var timeLeft = animationEnd - Date.now();
-            if (timeLeft <= 0) { return clearInterval(interval); }
-            var particleCount = 50 * (timeLeft / duration);
-            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-        }, 250);
-    }
-
-    function resetTool() {
-        clearInput();
-        document.getElementById('resultArea').classList.remove('active');
-        document.getElementById('resultArea').style.display = 'none';
-        document.getElementById('skeletonLoader').style.display = 'none';
-        currentHdUrl = ""; currentSdUrl = ""; currentAudioUrl = "";
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function triggerDownload(url) {
-        if (!url) return;
-        pendingDownloadUrl = url;
-        document.getElementById('adModal').style.display = 'flex';
-    }
-
-    function startActualDownload() {
-        document.getElementById('adModal').style.display = 'none';
-        if(pendingDownloadUrl) {
-            window.open(pendingDownloadUrl, '_blank');
-            pendingDownloadUrl = "";
-        }
-    }
-
-    async function getVideo() {
-        var urlInput = inputField.value;
-        var btn = document.getElementById('mainBtn');
-        var btnText = document.getElementById('btnText');
-        var btnLoader = document.getElementById('btnLoader');
-        var resultArea = document.getElementById('resultArea');
-        var skeleton = document.getElementById('skeletonLoader');
-        
-        if (!urlInput) { 
-            showToast("Please enter a link first.", 'error');
-            return; 
-        }
-        
-        btn.disabled = true; 
-        btnText.style.display = 'none'; 
-        btnLoader.style.display = 'block';
-        resultArea.style.display = 'none';
-        
-        // SKELETON LOADER SHOW
-        skeleton.style.display = 'block';
-        
-        try {
-            var myApiUrl = 'https://nebula-api-6cc6.onrender.com/download'; 
-            var response = await fetch(myApiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: urlInput })
-            });
-            
-            var data = await response.json();
-
-            if (data.status === "success") {
-                var thumbImg = document.getElementById('vidThumb');
-                if (data.thumbnail) { 
-                    thumbImg.src = data.thumbnail; 
-                    thumbImg.style.display = 'block'; 
-                } else { 
-                    thumbImg.style.display = 'none'; 
-                }
-                
-                var txt = document.createElement("textarea");
-                txt.innerHTML = data.title || "Video Found";
-                var cleanTitle = txt.value;
-                document.getElementById('vidTitle').innerText = cleanTitle;
-                
-                currentHdUrl = data.hd_url || ""; currentSdUrl = data.sd_url || ""; currentAudioUrl = data.audio_url || "";
-                
-                document.getElementById('btnHd').style.display = currentHdUrl ? 'flex' : 'none';
-                document.getElementById('btnSd').style.display = currentSdUrl ? 'flex' : 'none';
-                document.getElementById('btnMp3').style.display = currentAudioUrl ? 'flex' : 'none';
-                
-                document.getElementById('btnHd').onclick = function(e) { e.preventDefault(); triggerDownload(currentHdUrl); };
-                document.getElementById('btnSd').onclick = function(e) { e.preventDefault(); triggerDownload(currentSdUrl); };
-                document.getElementById('btnMp3').onclick = function(e) { e.preventDefault(); triggerDownload(currentAudioUrl); };
-
-                // Hide skeleton, show result
-                skeleton.style.display = 'none';
-                resultArea.style.display = 'block';
-                resultArea.classList.add('active');
-                
-                // Save to history & blast confetti
-                saveToHistory(urlInput, cleanTitle, data.thumbnail);
-                blastConfetti();
-                showToast("Video fetched successfully!", "success");
-
-            } else {
-                skeleton.style.display = 'none';
-                showToast(data.detail || "Video not found.", 'error');
-            }
-        } catch (e) {
-            skeleton.style.display = 'none';
-            showToast("Network Error: Server is waking up. Try again in 30s.", 'error');
-        } finally {
-            btn.disabled = false; 
-            btnText.style.display = 'block'; 
-            btnLoader.style.display = 'none';
-        }
-    }
-</script>
+    </main>
 </body>
 </html>
-    
