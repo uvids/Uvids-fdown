@@ -28,7 +28,7 @@ tailwind.config = {
     color: #e5e7eb;
     min-height: 100vh;
     overflow-x: hidden;
-    -webkit-tap-highlight-color: transparent; /* Fixes blue highlight on mobile tap */
+    -webkit-tap-highlight-color: transparent; /* Fixes mobile blue tap highlight */
   }
 
   /* Floating glowing orbs */
@@ -56,6 +56,9 @@ tailwind.config = {
   }
   .logo3d::after { content: ''; position: absolute; inset: 0; border-radius: 16px; background: linear-gradient(160deg, rgba(255,255,255,.35), transparent 50%); }
   .logo3d svg { position: relative; z-index: 2; transform: translateZ(14px); filter: drop-shadow(0 2px 3px rgba(0,0,0,.4)); }
+  
+  /* Footer Logo Flat Style */
+  .logo-flat { transform: none !important; box-shadow: 0 0 15px rgba(139,92,246,.5); }
 
   /* Main card */
   .main-card { transition: transform 0.4s ease, box-shadow 0.4s ease; }
@@ -64,11 +67,12 @@ tailwind.config = {
   /* Buttons */
   .btn-primary { background: linear-gradient(135deg, var(--blue), var(--purple)); box-shadow: 0 4px 15px rgba(24,119,242,.4); transition: all 0.3s ease; }
   .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(139,92,246,.6); filter: brightness(1.1); }
-  .btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 10px rgba(24,119,242,.4); }
+  /* Click effect for primary button */
+  .btn-primary:active { transform: translateY(2px) scale(0.98); box-shadow: 0 2px 10px rgba(24,119,242,.4); filter: brightness(0.8); }
   
   .btn-secondary { transition: all 0.3s ease; border: 1px solid rgba(255,255,255,.2); }
   .btn-secondary:hover { background: rgba(255,255,255,.1); }
-  .btn-secondary:active { transform: scale(0.98); }
+  .btn-secondary:active { transform: scale(0.96); background: rgba(255,255,255,.2); }
 
   /* Feature cards */
   .feature-card { transition: transform .35s ease, box-shadow .35s ease; transform: perspective(900px) rotateX(0) rotateY(0); }
@@ -109,11 +113,14 @@ tailwind.config = {
   @keyframes toastOut { from{opacity:1; transform:translateX(0)} to{opacity:0; transform:translateX(60px)} }
 
   /* Download Buttons */
-  .dl-btn { transition: all 0.3s ease; }
-  .dl-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(139,92,246,.4); }
-  .dl-btn:active { transform: translateY(0); }
+  .dl-btn { transition: all 0.2s ease; }
+  .dl-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(139,92,246,.4); }
+  .dl-btn:active { transform: scale(0.96) !important; filter: brightness(0.8); }
+  
   .dl-btn-secondary { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.15); }
   .dl-btn-secondary:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.3); box-shadow: 0 10px 25px rgba(0,0,0,.3); }
+  .dl-btn-secondary:active { background: rgba(255,255,255,.2); }
+
   .thumb { background: radial-gradient(circle at 25% 30%, rgba(24,119,242,.8), transparent 55%), radial-gradient(circle at 75% 70%, rgba(139,92,246,.8), transparent 55%), #12121c; }
 </style>
 </head>
@@ -169,11 +176,13 @@ tailwind.config = {
         <p id="errorMsg" class="text-red-400 text-sm mt-3 hidden text-center">Please paste a valid Facebook video link.</p>
       </div>
 
+      <!-- Loader -->
       <div id="loader" class="hidden flex-col items-center justify-center py-14">
         <div class="spinner"></div>
         <p class="mt-6 text-gray-300">Fetching video details...</p>
       </div>
 
+      <!-- Result Area -->
       <div id="result" class="hidden fade-in">
         <div class="flex flex-col sm:flex-row gap-5">
           <div id="videoThumb" class="thumb relative w-full sm:w-56 aspect-video rounded-2xl overflow-hidden border border-white/10 shrink-0 flex items-center justify-center bg-cover bg-center">
@@ -192,33 +201,20 @@ tailwind.config = {
           </div>
         </div>
 
-        <!-- Desktop Download Buttons -->
+        <!-- Unified Download Buttons (Single Grid, handles both mobile & PC) -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-8">
-          <button id="btnHd" onclick="triggerDownload('hd')" class="dl-btn btn-primary text-white font-semibold py-3.5 rounded-xl flex-col items-center justify-center leading-tight hidden sm:flex">
+          <button id="btnHd" onclick="triggerDownload('hd')" class="dl-btn btn-primary text-white font-semibold py-3.5 rounded-xl flex flex-col items-center justify-center leading-tight" style="display: none;">
             <span>⬇ HD (1080p)</span><span class="text-xs font-normal opacity-80">High Quality</span>
           </button>
-          <button id="btnSd" onclick="triggerDownload('sd')" class="dl-btn dl-btn-secondary text-white font-semibold py-3.5 rounded-xl flex-col items-center justify-center leading-tight hidden sm:flex">
+          <button id="btnSd" onclick="triggerDownload('sd')" class="dl-btn dl-btn-secondary text-white font-semibold py-3.5 rounded-xl flex flex-col items-center justify-center leading-tight" style="display: none;">
             <span>⬇ SD (720p)</span><span class="text-xs font-normal text-gray-400">Standard Quality</span>
           </button>
-          <button id="btnMp3" onclick="triggerDownload('audio')" class="dl-btn dl-btn-secondary text-white font-semibold py-3.5 rounded-xl flex-col items-center justify-center leading-tight hidden sm:flex">
+          <button id="btnMp3" onclick="triggerDownload('audio')" class="dl-btn dl-btn-secondary text-white font-semibold py-3.5 rounded-xl flex flex-col items-center justify-center leading-tight" style="display: none;">
             <span>♫ MP3 (Audio)</span><span class="text-xs font-normal text-gray-400">Audio Only</span>
           </button>
         </div>
 
-        <!-- Mobile Download Buttons -->
-        <div class="grid grid-cols-1 gap-3 mt-4 sm:hidden">
-          <button id="btnHdMob" onclick="triggerDownload('hd')" class="dl-btn btn-primary text-white font-semibold py-3.5 rounded-xl flex-col items-center justify-center leading-tight flex" style="display: none;">
-            <span>⬇ HD (1080p)</span><span class="text-xs font-normal opacity-80">High Quality</span>
-          </button>
-          <button id="btnSdMob" onclick="triggerDownload('sd')" class="dl-btn dl-btn-secondary text-white font-semibold py-3.5 rounded-xl flex-col items-center justify-center leading-tight flex" style="display: none;">
-            <span>⬇ SD (720p)</span><span class="text-xs font-normal text-gray-400">Standard Quality</span>
-          </button>
-          <button id="btnMp3Mob" onclick="triggerDownload('audio')" class="dl-btn dl-btn-secondary text-white font-semibold py-3.5 rounded-xl flex-col items-center justify-center leading-tight flex" style="display: none;">
-            <span>♫ MP3 (Audio)</span><span class="text-xs font-normal text-gray-400">Audio Only</span>
-          </button>
-        </div>
-
-        <button id="newBtn" class="btn-secondary w-full mt-5 flex items-center justify-center gap-2 py-3.5 rounded-xl text-gray-300 text-sm font-medium hover:text-white focus:outline-none focus:ring-0">
+        <button id="newBtn" class="btn-secondary w-full mt-5 flex items-center justify-center gap-2 py-3.5 rounded-xl text-gray-300 text-sm font-medium hover:text-white focus:outline-none">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
           Download Another Video
         </button>
@@ -270,7 +266,8 @@ tailwind.config = {
     <footer class="border-t border-white/10 bg-black/20 backdrop-blur-xl">
     <div class="max-w-6xl mx-auto px-5 py-10 text-center">
       <div class="flex items-center justify-center gap-3 mb-5">
-        <div class="logo3d" style="width:34px;height:34px;border-radius:11px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></div>
+        <!-- Fixed Footer Logo (Added logo-flat class to remove tilt) -->
+        <div class="logo3d logo-flat" style="width:34px;height:34px;border-radius:11px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></div>
         <span class="text-2xl font-bold grad-text">Uvids</span>
       </div>
 
@@ -313,7 +310,7 @@ tailwind.config = {
 <div id="toastContainer"></div>
 
 <script>
-  // ✅ AAPKA ASLI BACKEND URL YAHAN HAI
+  // ✅ AAPKA ASLI BACKEND URL
   const API_URL = "https://nebula-api-6cc6.onrender.com/download"; 
 
   const $ = (id) => document.getElementById(id);
@@ -337,7 +334,7 @@ tailwind.config = {
     setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 400); }, 3500);
   }
 
-  /* 3D Logo Effect */
+  /* 3D Logo Effect (Header only) */
   const logo = $('interactiveLogo');
   if(logo) {
     logo.addEventListener('mousemove', (e) => {
@@ -392,7 +389,7 @@ tailwind.config = {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   }
 
-  /* Check Link (API Call) */
+  /* Check Link */
   $('checkBtn').addEventListener('click', async () => {
     const val = urlInput.value.trim();
     if (!val) { 
@@ -432,14 +429,10 @@ tailwind.config = {
         currentLinks.sd = data.sd_url;
         currentLinks.audio = data.audio_url;
 
-        // Show/Hide Buttons dynamically
+        // Show/Hide Buttons dynamically based on available links
         $('btnHd').style.display = data.hd_url ? 'flex' : 'none';
         $('btnSd').style.display = data.sd_url ? 'flex' : 'none';
         $('btnMp3').style.display = data.audio_url ? 'flex' : 'none';
-        
-        $('btnHdMob').style.display = data.hd_url ? 'flex' : 'none';
-        $('btnSdMob').style.display = data.sd_url ? 'flex' : 'none';
-        $('btnMp3Mob').style.display = data.audio_url ? 'flex' : 'none';
 
         loader.classList.add('hidden'); 
         loader.classList.remove('flex');
