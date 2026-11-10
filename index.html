@@ -1,553 +1,547 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Uvids — Fast & Free Facebook Video Downloader</title>
-  
-  <!-- Google Fonts & Font Awesome Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uvids - Download Facebook Videos in HD</title>
+<meta name="description" content="Uvids: Fast, free Facebook video downloader. HD, SD and MP3, no watermark.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['Poppins', 'sans-serif'] },
+      colors: { fbblue: '#1877F2', violet: '#8B5CF6' }
+    }
+  }
+}
+</script>
+<style>
+  :root { --blue:#1877F2; --purple:#8B5CF6; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #0A0A0F;
+    color: #e5e7eb;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-  <style>
-    :root {
-      --bg-dark: #090d16;
-      --card-bg: rgba(22, 27, 46, 0.65);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --primary: #3b82f6;
-      --accent: #06b6d4;
-      --glow: rgba(59, 130, 246, 0.4);
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-    }
+  /* Floating glowing orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: .45;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 30% 30%, var(--blue), var(--purple));
+  }
+  .orb-1 { width: 420px; height: 420px; top: -120px; left: -120px; animation: float1 14s ease-in-out infinite; }
+  .orb-2 { width: 360px; height: 360px; top: 35%; right: -140px; background: radial-gradient(circle at 30% 30%, var(--purple), #4c1d95); animation: float2 18s ease-in-out infinite; }
+  .orb-3 { width: 320px; height: 320px; bottom: -100px; left: 25%; animation: float3 16s ease-in-out infinite; opacity: .35; }
+  .orb-4 { width: 200px; height: 200px; top: 60%; left: -60px; background: radial-gradient(circle at 30% 30%, #60a5fa, var(--purple)); animation: float2 20s ease-in-out infinite reverse; opacity:.3; }
+  @keyframes float1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(120px,90px) scale(1.15)} }
+  @keyframes float2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-100px,-80px) scale(1.2)} }
+  @keyframes float3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(90px,-110px) scale(.9)} }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
+  /* Glass */
+  .glass {
+    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 40px rgba(24,119,242,.12), inset 0 1px 0 rgba(255,255,255,.15);
+  }
 
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text);
-      overflow-x: hidden;
-      min-height: 100vh;
-      position: relative;
-    }
+  .grad-text {
+    background: linear-gradient(90deg, var(--blue), var(--purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .grad-bg { background: linear-gradient(135deg, var(--blue), var(--purple)); }
 
-    /* 3D Glowing Background Spheres */
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(120px);
-      z-index: 0;
-      pointer-events: none;
-    }
-    .orb-1 {
-      width: 450px;
-      height: 450px;
-      background: radial-gradient(circle, #2563eb, transparent);
-      top: -100px;
-      left: 10%;
-    }
-    .orb-2 {
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, #9333ea, transparent);
-      bottom: 10%;
-      right: 5%;
-    }
+  /* 3D Logo */
+  .logo3d {
+    width: 44px; height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    position: relative;
+    transform: perspective(300px) rotateX(18deg) rotateY(-22deg);
+    transform-style: preserve-3d;
+    box-shadow: 6px 8px 0 rgba(0,0,0,.35), 0 0 25px rgba(139,92,246,.7), inset 2px 2px 6px rgba(255,255,255,.45), inset -3px -3px 8px rgba(0,0,0,.35);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .5s;
+    animation: logoSpin 6s ease-in-out infinite;
+  }
+  .logo3d:hover { transform: perspective(300px) rotateX(0) rotateY(0) scale(1.08); }
+  .logo3d::after {
+    content: ''; position: absolute; inset: 0; border-radius: 14px;
+    background: linear-gradient(160deg, rgba(255,255,255,.35), transparent 50%);
+  }
+  .logo3d svg { position: relative; z-index: 2; transform: translateZ(14px); filter: drop-shadow(0 2px 3px rgba(0,0,0,.4)); }
+  @keyframes logoSpin {
+    0%,100% { transform: perspective(300px) rotateX(18deg) rotateY(-22deg); }
+    50% { transform: perspective(300px) rotateX(10deg) rotateY(22deg); }
+  }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
-      position: relative;
-      z-index: 1;
-    }
+  /* Main card tilt */
+  .tilt-wrap { perspective: 1200px; }
+  .tilt-card {
+    transform-style: preserve-3d;
+    transition: transform .25s ease-out, box-shadow .3s;
+    will-change: transform;
+  }
+  .tilt-card:hover {
+    box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 70px rgba(139,92,246,.3), inset 0 1px 0 rgba(255,255,255,.2);
+  }
 
-    /* Navbar */
-    header {
-      padding: 24px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .logo {
-      font-size: 1.8rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #60a5fa, #38bdf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .nav-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      margin-left: 24px;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-    .nav-links a:hover {
-      color: var(--text);
-    }
+  /* Pulse button */
+  .btn-glow {
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    box-shadow: 0 0 25px rgba(24,119,242,.6), 0 0 50px rgba(139,92,246,.4);
+    animation: pulseGlow 2s ease-in-out infinite;
+    transition: transform .2s, filter .2s;
+  }
+  .btn-glow:hover { transform: translateY(-2px) scale(1.02); filter: brightness(1.15); }
+  .btn-glow:active { transform: scale(.98); }
+  @keyframes pulseGlow {
+    0%,100% { box-shadow: 0 0 20px rgba(24,119,242,.55), 0 0 40px rgba(139,92,246,.35); transform: scale(1); }
+    50% { box-shadow: 0 0 40px rgba(24,119,242,.9), 0 0 80px rgba(139,92,246,.6); transform: scale(1.03); }
+  }
+  .btn-glow:hover { animation-play-state: paused; }
 
-    /* Hero Section */
-    .hero {
-      text-align: center;
-      padding: 70px 0 40px;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 16px;
-      border-radius: 50px;
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      color: #60a5fa;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 20px;
-    }
-    .hero h1 {
-      font-size: 3.2rem;
-      font-weight: 800;
-      line-height: 1.2;
-      margin-bottom: 18px;
-    }
-    .hero h1 span {
-      background: linear-gradient(135deg, #38bdf8, #818cf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .hero p {
-      color: var(--text-muted);
-      font-size: 1.15rem;
-      max-width: 600px;
-      margin: 0 auto 40px;
-    }
+  /* Feature cards tilt */
+  .feature-card {
+    transition: transform .35s ease, box-shadow .35s ease;
+    transform: perspective(900px) rotateX(0) rotateY(0);
+  }
+  .feature-card:hover {
+    transform: perspective(900px) rotateX(8deg) rotateY(-10deg) translateY(-8px) scale(1.03);
+    box-shadow: 0 30px 60px rgba(0,0,0,.6), 0 0 50px rgba(139,92,246,.35);
+  }
 
-    /* 3D Input Card */
-    .download-box {
-      max-width: 780px;
-      margin: 0 auto;
-      background: var(--card-bg);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid var(--card-border);
-      padding: 12px;
-      border-radius: 20px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 25px var(--glow);
-      display: flex;
-      gap: 12px;
-      position: relative;
-    }
-    .input-wrapper {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      background: rgba(15, 23, 42, 0.6);
-      border-radius: 14px;
-      padding: 0 16px;
-      border: 1px solid transparent;
-      transition: border 0.3s ease;
-    }
-    .input-wrapper:focus-within {
-      border: 1px solid var(--primary);
-    }
-    .input-wrapper i {
-      color: var(--text-muted);
-      margin-right: 12px;
-    }
-    .input-wrapper input {
-      width: 100%;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: #fff;
-      font-size: 1rem;
-      padding: 14px 0;
-    }
-    .btn-paste {
-      background: rgba(255, 255, 255, 0.08);
-      border: none;
-      color: var(--text-muted);
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: all 0.2s;
-    }
-    .btn-paste:hover {
-      background: rgba(255, 255, 255, 0.15);
-      color: #fff;
-    }
-    .btn-download {
-      background: linear-gradient(135deg, #2563eb, #0284c7);
-      color: #fff;
-      border: none;
-      padding: 0 28px;
-      border-radius: 14px;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn-download:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
-    }
+  /* Input */
+  .url-input {
+    background: rgba(10,10,15,.6);
+    border: 1px solid rgba(255,255,255,.12);
+    transition: border-color .3s, box-shadow .3s;
+  }
+  .url-input:focus-within {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(139,92,246,.25), 0 0 30px rgba(24,119,242,.25);
+  }
 
-    /* Result Preview Section (Hidden initially) */
-    .result-section {
-      display: none;
-      max-width: 780px;
-      margin: 30px auto 0;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 18px;
-      padding: 24px;
-      animation: fadeIn 0.4s ease forwards;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .preview-card {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .thumbnail {
-      width: 180px;
-      height: 110px;
-      border-radius: 12px;
-      object-fit: cover;
-      background: #1e293b;
-    }
-    .video-info {
-      flex: 1;
-    }
-    .video-title {
-      font-weight: 700;
-      margin-bottom: 8px;
-      line-height: 1.4;
-    }
-    .quality-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-    .quality-btn {
-      background: #1e293b;
-      color: #fff;
-      border: 1px solid var(--card-border);
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background 0.2s;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .quality-btn:hover {
-      background: var(--primary);
-    }
+  /* Spinner */
+  .spinner {
+    width: 56px; height: 56px; border-radius: 50%;
+    border: 4px solid rgba(255,255,255,.1);
+    border-top-color: var(--blue);
+    border-right-color: var(--purple);
+    animation: spin 0.9s linear infinite;
+    box-shadow: 0 0 25px rgba(139,92,246,.5);
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* 3D Feature Grid */
-    .features {
-      padding: 80px 0;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-    }
-    .feature-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 32px 24px;
-      text-align: left;
-      transition: transform 0.3s ease, border-color 0.3s ease;
-      transform-style: preserve-3d;
-      perspective: 1000px;
-    }
-    .feature-card:hover {
-      border-color: rgba(96, 165, 250, 0.4);
-      transform: translateY(-8px);
-    }
-    .feature-icon {
-      width: 50px;
-      height: 50px;
-      background: rgba(59, 130, 246, 0.15);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      color: #38bdf8;
-      margin-bottom: 20px;
-    }
-    .feature-card h3 {
-      font-size: 1.25rem;
-      margin-bottom: 10px;
-    }
-    .feature-card p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
+  /* Fade in */
+  .fade-in { animation: fadeIn .6s ease both; }
+  @keyframes fadeIn { from{opacity:0; transform:translateY(20px)} to{opacity:1; transform:translateY(0)} }
 
-    /* How It Works Steps */
-    .steps {
-      padding: 50px 0;
-      text-align: center;
-    }
-    .steps h2 {
-      font-size: 2.2rem;
-      margin-bottom: 40px;
-    }
-    .steps-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-    }
-    .step-box {
-      background: rgba(15, 23, 42, 0.4);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 24px;
-      position: relative;
-    }
-    .step-num {
-      font-size: 2.5rem;
-      font-weight: 800;
-      color: rgba(255, 255, 255, 0.1);
-      margin-bottom: 8px;
-    }
+  /* FAQ */
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] summary .chev { transform: rotate(180deg); }
+  details .chev { transition: transform .3s; }
+  details[open] { box-shadow: 0 0 30px rgba(139,92,246,.2); }
+  details > div { animation: fadeIn .35s ease both; }
 
-    /* FAQ */
-    .faq {
-      max-width: 800px;
-      margin: 40px auto 80px;
-    }
-    .faq h2 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .faq-item {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      margin-bottom: 12px;
-      padding: 18px 20px;
-      cursor: pointer;
-    }
-    .faq-question {
-      font-weight: 600;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .faq-answer {
-      color: var(--text-muted);
-      margin-top: 10px;
-      font-size: 0.95rem;
-      display: none;
-      line-height: 1.5;
-    }
-    .faq-item.active .faq-answer {
-      display: block;
-    }
+  /* Modal */
+  #contactModal { transition: opacity .3s ease; }
+  #contactModal.hidden-modal { opacity: 0; pointer-events: none; }
+  #contactModal .modal-box { transition: transform .35s cubic-bezier(.2,.9,.3,1.2); }
+  #contactModal.hidden-modal .modal-box { transform: scale(.9) translateY(30px); }
 
-    /* Footer */
-    footer {
-      border-top: 1px solid var(--card-border);
-      padding: 30px 0;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-    }
+  .field {
+    background: rgba(10,10,15,.6);
+    border: 1px solid rgba(255,255,255,.12);
+    transition: border-color .3s, box-shadow .3s;
+    color: #fff;
+  }
+  .field:focus { outline: none; border-color: var(--purple); box-shadow: 0 0 0 3px rgba(139,92,246,.25); }
+  .field::placeholder { color: #6b7280; }
 
-    @media (max-width: 650px) {
-      .hero h1 { font-size: 2.2rem; }
-      .download-box { flex-direction: column; }
-      .btn-download { padding: 14px; justify-content: center; }
-      .preview-card { flex-direction: column; text-align: center; }
-      .quality-buttons { justify-content: center; }
-    }
-  </style>
-</head>
+  /* Toast */
+  #toastContainer { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+  .toast {
+    background: linear-gradient(135deg, rgba(24,119,242,.95), rgba(139,92,246,.95));
+    color: #fff; padding: 14px 20px; border-radius: 14px; font-size: 14px; max-width: 340px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.5), 0 0 30px rgba(139,92,246,.5);
+    backdrop-filter: blur(10px);
+    animation: toastIn .4s ease both;
+  }
+  .toast.out { animation: toastOut .4s ease both; }
+  @keyframes toastIn { from{opacity:0; transform:translateX(60px)} to{opacity:1; transform:translateX(0)} }
+  @keyframes toastOut { from{opacity:1; transform:translateX(0)} to{opacity:0; transform:translateX(60px)} }
+
+  .dl-btn { transition: transform .2s, box-shadow .2s, background .2s; }
+  .dl-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(139,92,246,.45); }
+
+  .thumb {
+    background:
+      radial-gradient(circle at 25% 30%, rgba(24,119,242,.8), transparent 55%),
+      radial-gradient(circle at 75% 70%, rgba(139,92,246,.8), transparent 55%),
+      #12121c;
+  }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #0A0A0F; }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(var(--blue), var(--purple)); border-radius: 8px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+</style>
+  </head>
 <body>
 
-  <!-- Floating Background Glows -->
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
+<!-- Floating orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="orb orb-4"></div>
 
-  <div class="container">
-    <!-- Navbar -->
-    <header>
-      <div class="logo">
-        <i class="fa-solid fa-play-circle"></i> Uvids
+<div class="relative z-10">
+
+  <!-- Header -->
+  <header class="max-w-6xl mx-auto px-5 py-6 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-3">
+      <div class="logo3d">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/>
+        </svg>
       </div>
-      <nav class="nav-links">
-        <a href="#how-to">Kaise use karein</a>
-        <a href="#features">Features</a>
-        <a href="#faq">FAQ</a>
-      </nav>
-    </header>
+      <span class="text-2xl font-extrabold tracking-tight grad-text">Uvids</span>
+    </a>
+    <nav class="hidden sm:flex items-center gap-6 text-sm text-gray-300">
+      <a href="#features" class="hover:text-white transition">Features</a>
+      <a href="#faq" class="hover:text-white transition">FAQ</a>
+      <button onclick="openModal()" class="glass px-4 py-2 rounded-full hover:text-white transition">Contact</button>
+    </nav>
+  </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="badge">
-        <i class="fa-solid fa-bolt"></i> Ultra Fast & Secure
-      </div>
-      <h1>Facebook Videos Download Karein <br><span>HD & 4K Quality</span> Me</h1>
-      <p>FB Reels, Videos aur Stories ko bina kisi registration ke 1-Click me download karein.</p>
+  <main>
+    <!-- Hero -->
+    <section class="max-w-4xl mx-auto px-5 pt-10 pb-8 text-center">
+      <span class="glass inline-block px-4 py-1.5 rounded-full text-xs font-medium text-gray-300 mb-6">⚡ Fast &bull; Secure &bull; Unlimited</span>
+      <h1 class="text-4xl sm:text-6xl font-extrabold leading-tight mb-5">
+        Download Facebook Videos <span class="grad-text">in HD</span>
+      </h1>
+      <p class="text-lg sm:text-xl text-gray-400 font-light">Fast, Free, No Watermark</p>
+    </section>
 
-      <!-- Main Input Box -->
-      <div class="download-box">
-        <div class="input-wrapper">
-          <i class="fa-brands fa-facebook"></i>
-          <input type="text" id="fbUrl" placeholder="Facebook Video link yahan paste karein...">
-          <button class="btn-paste" onclick="pasteClipboard()">Paste</button>
+    <!-- Downloader Card -->
+    <section class="max-w-3xl mx-auto px-5 pb-16 tilt-wrap">
+      <div id="mainCard" class="tilt-card glass rounded-3xl p-6 sm:p-10">
+
+        <!-- Input Area -->
+        <div id="inputArea">
+          <label for="urlInput" class="block text-sm text-gray-400 mb-3">Paste your Facebook video link</label>
+          <div class="url-input rounded-2xl flex items-center gap-2 p-2">
+            <svg class="ml-3 shrink-0 text-gray-500" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <input id="urlInput" type="text" placeholder="https://www.facebook.com/watch?v=..." class="flex-1 bg-transparent outline-none text-white placeholder-gray-500 px-2 py-3 min-w-0 text-sm sm:text-base" autocomplete="off">
+            <button id="pasteBtn" type="button" class="grad-bg text-white text-sm font-medium px-4 py-2.5 rounded-xl hover:brightness-110 transition shrink-0">Paste</button>
+            <button id="clearBtn" type="button" class="bg-white/10 hover:bg-white/20 text-gray-200 text-sm font-medium px-4 py-2.5 rounded-xl transition shrink-0">Clear</button>
+          </div>
+
+          <button id="checkBtn" type="button" class="btn-glow w-full mt-6 py-4 rounded-2xl text-white text-lg font-semibold tracking-wide">
+            Check Link
+          </button>
+          <p id="errorMsg" class="text-red-400 text-sm mt-3 hidden text-center">Please paste a valid Facebook video link.</p>
         </div>
-        <button class="btn-download" onclick="handleDownload()">
-          <i class="fa-solid fa-arrow-down"></i> Get Video
-        </button>
-      </div>
 
-      <!-- Result Card -->
-      <div class="result-section" id="resultCard">
-        <div class="preview-card">
-          <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500" alt="Video Preview" class="thumbnail" id="videoThumb">
-          <div class="video-info">
-            <h4 class="video-title" id="videoTitle">Facebook Reel / Video Title</h4>
-            <p style="color: var(--text-muted); font-size: 0.85rem;">Duration: 00:45 | Quality: 1080p Full HD</p>
-            <div class="quality-buttons">
-              <a href="#" class="quality-btn" download><i class="fa-solid fa-download"></i> 1080p HD</a>
-              <a href="#" class="quality-btn" download><i class="fa-solid fa-download"></i> 720p SD</a>
-              <a href="#" class="quality-btn" download><i class="fa-solid fa-music"></i> Audio MP3</a>
+        <!-- Loader -->
+        <div id="loader" class="hidden flex-col items-center justify-center py-14">
+          <div class="spinner"></div>
+          <p class="mt-6 text-gray-300">Analyzing your video link...</p>
+        </div>
+
+        <!-- Result -->
+        <div id="result" class="hidden fade-in">
+          <div class="flex flex-col sm:flex-row gap-5">
+            <div class="thumb relative w-full sm:w-56 aspect-video rounded-2xl overflow-hidden border border-white/10 shrink-0 flex items-center justify-center">
+              <div class="w-14 h-14 rounded-full bg-white/20 backdrop-blur flex items-center justify-center shadow-lg">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+              <span class="absolute bottom-2 right-2 bg-black/70 text-xs px-2 py-0.5 rounded">03:24</span>
+            </div>
+            <div class="flex-1 text-left">
+              <h3 class="text-lg sm:text-xl font-semibold text-white">Amazing Sunset Timelapse - Full HD Video</h3>
+              <p class="text-sm text-gray-400 mt-1">facebook.com &bull; 1.2M views</p>
+              <div class="mt-3 inline-flex items-center gap-2 text-xs text-green-400 bg-green-400/10 px-3 py-1 rounded-full">
+                <span class="w-2 h-2 rounded-full bg-green-400"></span> Ready to download
+              </div>
             </div>
           </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
+            <button class="dl-btn grad-bg text-white font-semibold py-3.5 rounded-xl" onclick="showToast('Starting HD (1080p) download...')">⬇ HD (1080p)</button>
+            <button class="dl-btn bg-white/10 border border-white/15 text-white font-semibold py-3.5 rounded-xl hover:bg-white/15" onclick="showToast('Starting SD (720p) download...')">⬇ SD (720p)</button>
+            <button class="dl-btn bg-white/10 border border-white/15 text-white font-semibold py-3.5 rounded-xl hover:bg-white/15" onclick="showToast('Starting MP3 (Audio) download...')">♫ MP3 (Audio)</button>
+          </div>
+
+          <button id="newBtn" class="mt-6 mx-auto block text-sm text-gray-400 hover:text-white underline underline-offset-4 transition">Download another video</button>
         </div>
       </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="features" id="features">
-      <div class="feature-card">
-        <div class="feature-icon"><i class="fa-solid fa-gauge-high"></i></div>
-        <h3>High-Speed Server</h3>
-        <p>Bina kisi buffering ke direct high-speed server se video download access.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
-        <h3>100% Safe & Private</h3>
-        <p>Aapka koi personal data store nahi hota. Poori tarah secure aur ads-free environment.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon"><i class="fa-solid fa-mobile-screen"></i></div>
-        <h3>Sabhi Devices Compatible</h3>
-        <p>Mobile, Tablet, Android, iPhone ya PC—sab jagah smoothly kaam karega.</p>
-      </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section class="steps" id="how-to">
-      <h2>Sirf 3 Simple Steps</h2>
-      <div class="steps-grid">
-        <div class="step-box">
-          <div class="step-num">01</div>
-          <h4>Link Copy Karein</h4>
-          <p style="color: var(--text-muted); margin-top: 8px;">Facebook app ya site se kisi bhi video ka link copy karein.</p>
+    <!-- Features -->
+    <section id="features" class="max-w-6xl mx-auto px-5 pb-20">
+      <h2 class="text-3xl sm:text-4xl font-bold text-center mb-3">Why Choose <span class="grad-text">Uvids</span>?</h2>
+      <p class="text-center text-gray-400 mb-12">Everything you need for a premium download experience.</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="feature-card glass rounded-3xl p-8">
+          <div class="w-14 h-14 rounded-2xl grad-bg flex items-center justify-center mb-5 shadow-[0_0_25px_rgba(24,119,242,.5)]">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">Lightning Fast</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">Paste the link and get your download options in seconds with our optimized servers.</p>
         </div>
-        <div class="step-box">
-          <div class="step-num">02</div>
-          <h4>Uvids Par Paste Karein</h4>
-          <p style="color: var(--text-muted); margin-top: 8px;">Upar diye gaye input box me link paste karein aur click karein.</p>
+        <div class="feature-card glass rounded-3xl p-8">
+          <div class="w-14 h-14 rounded-2xl grad-bg flex items-center justify-center mb-5 shadow-[0_0_25px_rgba(139,92,246,.5)]">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">HD Quality</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">Save videos in crisp 1080p HD, standard 720p, or extract audio as MP3 anytime.</p>
         </div>
-        <div class="step-box">
-          <div class="step-num">03</div>
-          <h4>Download Par Click Karein</h4>
-          <p style="color: var(--text-muted); margin-top: 8px;">Apni manpasand quality (HD/SD/MP3) select karke save karein.</p>
+        <div class="feature-card glass rounded-3xl p-8">
+          <div class="w-14 h-14 rounded-2xl grad-bg flex items-center justify-center mb-5 shadow-[0_0_25px_rgba(24,119,242,.5)]">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">Safe &amp; Private</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">No signup, no watermark, no tracking. Your downloads stay completely private.</p>
         </div>
       </div>
     </section>
 
-    <!-- FAQ Section -->
-    <section class="faq" id="faq">
-      <h2>Frequently Asked Questions</h2>
-      <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-question">Kya Uvids bilkul free hai? <i class="fa-solid fa-chevron-down"></i></div>
-        <div class="faq-answer">Haan, yeh service sabhi users ke liye 100% lifetime free hai.</div>
-      </div>
-      <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-question">Kya mujhe koi account create karna hoga? <i class="fa-solid fa-chevron-down"></i></div>
-        <div class="faq-answer">Nahi, bina kisi registration ya login ke aap directly download kar sakte hain.</div>
-      </div>
-      <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-question">Kya private videos download ho sakte hain? <i class="fa-solid fa-chevron-down"></i></div>
-        <div class="faq-answer">Nahi, security reasons ki wajah se sirf public videos aur reels hi download kiye ja sakte hain.</div>
+    <!-- FAQ -->
+    <section id="faq" class="max-w-3xl mx-auto px-5 pb-24">
+      <h2 class="text-3xl sm:text-4xl font-bold text-center mb-3">Frequently Asked <span class="grad-text">Questions</span></h2>
+      <p class="text-center text-gray-400 mb-10">Quick answers to common questions.</p>
+      <div class="space-y-4">
+        <details class="glass rounded-2xl p-5">
+          <summary class="flex items-center justify-between font-medium text-white">
+            How do I download a Facebook video?
+            <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </summary>
+          <div class="mt-3 text-gray-400 text-sm leading-relaxed">Copy the video link from Facebook, paste it into the box above, click "Check Link", then choose your preferred quality to download.</div>
+        </details>
+        <details class="glass rounded-2xl p-5">
+          <summary class="flex items-center justify-between font-medium text-white">
+            Is Uvids really free?
+            <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </summary>
+          <div class="mt-3 text-gray-400 text-sm leading-relaxed">Yes. Uvids is 100% free to use with no hidden fees, no signup and no watermark on your videos.</div>
+        </details>
+        <details class="glass rounded-2xl p-5">
+          <summary class="flex items-center justify-between font-medium text-white">
+            Which video qualities are supported?
+            <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </summary>
+          <div class="mt-3 text-gray-400 text-sm leading-relaxed">We offer HD (1080p), SD (720p) when available, plus an MP3 audio-only option.</div>
+        </details>
+        <details class="glass rounded-2xl p-5">
+          <summary class="flex items-center justify-between font-medium text-white">
+            Can I download private videos?
+            <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </summary>
+          <div class="mt-3 text-gray-400 text-sm leading-relaxed">Only publicly available videos can be downloaded. Private videos are not accessible and we respect user privacy.</div>
+        </details>
+        <details class="glass rounded-2xl p-5">
+          <summary class="flex items-center justify-between font-medium text-white">
+            Does it work on mobile?
+            <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </summary>
+          <div class="mt-3 text-gray-400 text-sm leading-relaxed">Absolutely. Uvids works on any modern browser on phones, tablets and desktops.</div>
+        </details>
       </div>
     </section>
+  </main>
 
-    <!-- Footer -->
-    <footer>
-      <p>&copy; 2026 Uvids. All Rights Reserved. Disclaimer: We are not affiliated with Meta or Facebook.</p>
-    </footer>
+  <!-- Footer -->
+  <footer class="border-t border-white/10 bg-black/20 backdrop-blur-xl">
+    <div class="max-w-6xl mx-auto px-5 py-10 text-center">
+      <div class="flex items-center justify-center gap-3 mb-5">
+        <div class="logo3d" style="width:34px;height:34px;border-radius:11px;animation:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
+        </div>
+        <span class="text-xl font-bold grad-text">Uvids</span>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-gray-400 mb-6">
+        <a href="#" class="hover:text-white transition">Privacy Policy</a>
+        <a href="#" class="hover:text-white transition">DMCA</a>
+        <button id="contactBtn" type="button" class="hover:text-white transition">Contact Us</button>
+      </div>
+
+      <a href="mailto:uvids.support@gmail.com" class="inline-flex items-center gap-2 glass px-5 py-2.5 rounded-full text-sm text-gray-200 hover:text-white transition">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#envGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <defs><linearGradient id="envGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1877F2"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs>
+          <rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/>
+        </svg>
+        uvids.support@gmail.com
+      </a>
+
+      <p class="text-xs text-gray-500 mt-8 max-w-xl mx-auto">This website is not affiliated with Meta or Facebook.</p>
+      <p class="text-xs text-gray-600 mt-2">&copy; <span id="year"></span> Uvids. All rights reserved.</p>
+    </div>
+  </footer>
+</div>
+
+<!-- Contact Modal -->
+<div id="contactModal" class="hidden-modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-box glass rounded-3xl w-full max-w-lg p-6 sm:p-8 relative max-h-[95vh] overflow-y-auto" style="background:linear-gradient(135deg, rgba(30,30,50,.85), rgba(15,15,25,.9));">
+    <button id="closeModal" type="button" aria-label="Close" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <h3 id="modalTitle" class="text-2xl font-bold grad-text mb-1">Contact Us</h3>
+    <p class="text-sm text-gray-400 mb-6">Have a question or feedback? We'd love to hear from you.</p>
+
+    <form id="contactForm" class="space-y-4">
+      <div>
+        <label for="cName" class="block text-sm text-gray-300 mb-1.5">Name</label>
+        <input id="cName" type="text" required placeholder="Your name" class="field w-full rounded-xl px-4 py-3 text-sm">
+      </div>
+      <div>
+        <label for="cEmail" class="block text-sm text-gray-300 mb-1.5">Email</label>
+        <input id="cEmail" type="email" required placeholder="you@example.com" class="field w-full rounded-xl px-4 py-3 text-sm">
+      </div>
+      <div>
+        <label for="cSubject" class="block text-sm text-gray-300 mb-1.5">Subject</label>
+        <input id="cSubject" type="text" required placeholder="How can we help?" class="field w-full rounded-xl px-4 py-3 text-sm">
+      </div>
+      <div>
+        <label for="cMessage" class="block text-sm text-gray-300 mb-1.5">Message</label>
+        <textarea id="cMessage" rows="4" required placeholder="Write your message..." class="field w-full rounded-xl px-4 py-3 text-sm resize-none"></textarea>
+      </div>
+      <button type="submit" class="btn-glow w-full py-3.5 rounded-xl text-white font-semibold">Send Message</button>
+    </form>
   </div>
+</div>
 
-  <script>
-    // Paste from Clipboard functionality
-    async function pasteClipboard() {
-      try {
-        const text = await navigator.clipboard.readText();
-        document.getElementById('fbUrl').value = text;
-      } catch (err) {
-        alert("Clipboard permission grant kijiye.");
-      }
+<!-- Toasts -->
+<div id="toastContainer"></div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const urlInput = $('urlInput');
+  const inputArea = $('inputArea');
+  const loader = $('loader');
+  const result = $('result');
+  const errorMsg = $('errorMsg');
+  const modal = $('contactModal');
+
+  $('year').textContent = new Date().getFullYear();
+
+  /* Toast */
+  function showToast(message) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = message;
+    $('toastContainer').appendChild(t);
+    setTimeout(() => {
+      t.classList.add('out');
+      setTimeout(() => t.remove(), 400);
+    }, 3500);
+  }
+
+  /* Paste */
+  $('pasteBtn').addEventListener('click', async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      urlInput.value = text;
+      errorMsg.classList.add('hidden');
+      showToast(text ? 'Link pasted from clipboard!' : 'Clipboard is empty.');
+    } catch (e) {
+      showToast('Unable to access clipboard. Please paste manually (Ctrl+V).');
+      urlInput.focus();
     }
+  });
 
-    // Simulated Fetch & Download button click
-    function handleDownload() {
-      const input = document.getElementById('fbUrl').value.trim();
-      const resultCard = document.getElementById('resultCard');
+  /* Clear */
+  $('clearBtn').addEventListener('click', () => {
+    urlInput.value = '';
+    errorMsg.classList.add('hidden');
+    urlInput.focus();
+  });
 
-      if (!input) {
-        alert("Kripya valid Facebook video link enter karein!");
-        return;
-      }
-
-      // Button loading state
-      const btn = document.querySelector('.btn-download');
-      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Fetching...`;
-
-      // Simulating API response (yahan aap apna API call integrate kar sakte hain)
-      setTimeout(() => {
-        btn.innerHTML = `<i class="fa-solid fa-arrow-down"></i> Get Video`;
-        resultCard.style.display = "block";
-        resultCard.scrollIntoView({ behavior: 'smooth' });
-      }, 1200);
+  /* Check Link */
+  $('checkBtn').addEventListener('click', () => {
+    const val = urlInput.value.trim();
+    if (!val) {
+      errorMsg.textContent = 'Please paste a video link first.';
+      errorMsg.classList.remove('hidden');
+      return;
     }
+    errorMsg.classList.add('hidden');
+    inputArea.classList.add('hidden');
+    result.classList.add('hidden');
+    loader.classList.remove('hidden');
+    loader.classList.add('flex');
 
-    // FAQ Toggle
-    function toggleFaq(element) {
-      element.classList.toggle('active');
-    }
-  </script>
+    setTimeout(() => {
+      loader.classList.add('hidden');
+      loader.classList.remove('flex');
+      result.classList.remove('hidden');
+    }, 1500);
+  });
+
+  urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') $('checkBtn').click(); });
+
+  /* Reset */
+  $('newBtn').addEventListener('click', () => {
+    result.classList.add('hidden');
+    inputArea.classList.remove('hidden');
+    urlInput.value = '';
+    urlInput.focus();
+  });
+
+  /* Modal */
+  function openModal() {
+    modal.classList.remove('hidden-modal');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    modal.classList.add('hidden-modal');
+    document.body.style.overflow = '';
+  }
+  $('contactBtn').addEventListener('click', openModal);
+  $('closeModal').addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+  /* Contact form */
+  $('contactForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    closeModal();
+    e.target.reset();
+    showToast('Message sent successfully! We will reply from uvids.support@gmail.com');
+  });
+
+  /* Main card 3D tilt on hover */
+  const card = $('mainCard');
+  card.addEventListener('mousemove', (e) => {
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    card.style.transform = `rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateZ(10px)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'rotateY(0) rotateX(0) translateZ(0)';
+  });
+</script>
 </body>
 </html>
